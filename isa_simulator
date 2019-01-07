@@ -1,0 +1,396 @@
+package isa_simulator;
+import java.io.*;
+import java.util.*;
+import java.text.*;
+/**
+ * date: 2/20/18
+ * @author makenna
+ */
+public class Isa_simulator {
+
+    public static String IN[] = new String[1000]; //array for data from outer file
+    public static int cnt = 0; //counter on IN[]
+    public static String var_name[] = new String[30]; //array for variable name
+    public static int vn1 = 0; //index for var_name[]
+    public static float var_val[] = new float[30]; //array for variable value
+    public static int vv1 = 0; //index for var_val[]
+    public static String code[] = new String[100]; //array for current dram status
+    public static int c1 = 0; //index for code[]
+    public static Float data[] = new Float[100]; //array for data 
+    public static int d1 = 0; //index for data
+    public static float dta[] = new float[10]; //array for dta 
+    //public static int p1 =0, p2 = 0, p3 = 0;
+    
+    
+    public static void main(String[] args) {
+        try{
+            BufferedReader br = new BufferedReader(new FileReader("data.txt"));
+            while(true){
+                String line = br.readLine();
+                if(line == null){
+                    break;
+                }//end if
+                IN[cnt] = line;
+                System.out.println(IN[cnt]);
+                cnt++;
+            }//end while
+        }catch(IOException ioe)
+        {
+            System.err.println("Input Output Exception");
+        }
+        loader(); //main memory
+        interpreter(); //cpu 
+    }//end main
+    
+    public static void loader(){
+        System.out.println("Its loader equivalant to memory");
+        
+        int i=0, j=0, k=0, tmp=0;
+        int end1=0, end2=0;
+        
+        String top[] = new String[100];
+        String middle[][] = new String[100][4];
+        String bottom[] = new String[100];
+        int t1=0, m1=0, m2=0, b1=0;
+        
+        for(i = 0; i<cnt; i++){
+            if(IN[i].equals("END")){
+                end1 = i;
+                break;
+            }//end if
+        }//end for(i)
+        
+        for(i=end1+1; i<cnt; i++){
+            if(IN[i].equals("END")){
+                end2 = i;
+            }//end if
+        }//ed for(i)
+        System.out.println("end1: "+end1+" end2: "+end2);
+        
+        //tokenize each data field in top block 
+        for(i=0; i<end1; i++){
+            StringTokenizer line1 = new StringTokenizer(IN[i]);
+            while(line1.hasMoreTokens()){
+                top[t1] = line1.nextToken();
+                System.out.println(top[t1]);
+                t1++;         
+            }//end while
+        }//end for(i)
+        
+        //select variable name 
+        for(i=0; i<t1; i++){
+         if((i%4) == 1){
+             var_name[vn1] = top[i];
+             vn1++;
+         }//fi
+        }//for(i)
+        
+        /*for(i=0; i<vn1; i++){
+            System.out.println(var_name[i]);
+        }*/
+        
+        //tokenize command line into middle[][]
+        for(j =end1+1; j<end2; j++){
+            StringTokenizer line2 = new StringTokenizer(IN[j]);
+            while(line2.hasMoreTokens()){
+                middle[m1][m2] = line2.nextToken();
+                m2++;
+            }//while
+            m1 = m1 +1;
+            m2 = 0;
+        }//for(j) 
+        for(i=0; i<m1; i++)
+            for(j=0; j<4; j++){
+                System.out.println(middle[i][j]);
+            }
+        //convert middle[][] into code[] which will be 10bit decimal num as load on actual memory
+        for(i=0; i<100; i++){
+            code[i] = "";
+        }//for(i)
+        
+        for(i=0; i<m1; i++){
+            for(j=0; j<4; j++){
+                if(middle[i][j] == null){
+                    code[c1] = code[c1] + "000";
+                }//if
+                else{
+                    code[c1] = code[c1] + encode(middle[i][j]);
+                }//else
+                //c1 = c1 + 1;
+               
+            }//for(j) 
+             c1++;
+        }//for
+        for(i = 0; i<c1; i++){
+                System.out.println("code " +i+ " is " +code[i]);
+            }
+        
+        //tokenize bottom block 
+        for(k = end2+1; k<cnt; k++){
+            bottom[b1] = IN[k];
+            b1 = b1 + 1;
+        }//for(k)
+        
+        
+        
+        //convert String bottom[] block into Float 
+        for(i = 0; i<b1; i++){
+            data[d1] = Float.parseFloat(bottom[i]);
+            d1 = d1+1;
+        }//fori
+        for(i = 0; i< d1; i++){
+            System.out.println(data[i]);
+        }
+        
+        
+    }//end loader
+    public static void interpreter(){
+        System.out.println("Its interpreter!!!!!!!");
+        
+        int i =0, j=0, tmp=0;
+        int pc = 0, dc = 0;
+        String inst ="";
+        String opc="", op1 = "", op2 = "", op3="";
+        
+        //for(i = 0; i< 30; i++){
+           // var_va1[i] = (float)0.0;
+        //}//fori 
+        
+         System.out.println(" ");
+        System.out.println("trace of program");
+        System.out.println("=================="); 
+        
+        //nexti
+        
+        while(opc.compareTo("-9") !=0){
+
+        //6 step cpu execution put 16 code[] in while loop until opc meets -9(stop)
+ 
+        //step1: instruction fetch 
+        //opc = code[0].substring(0, 1); //example
+        //String opr1 = code[0].substring(2, 4); //example
+        inst = code[pc];
+        System.out.println("inst: " +inst);
+        
+        //step2: instruction decode
+        opc = inst.substring(0, 2);
+        op1 = code[i].substring(2, 5);
+        op2 = inst.substring(5, 8);
+        op3 = inst.substring(8);
+        //System.out.println("opc: " +opc+" op1:" +op1+" op2:" +op2+" op3: "+op3);
+        
+        //for loop 
+        
+        //step3: fetch operand
+            switch (opc) { //switch & cases
+
+                case "+0":
+                    System.out.println("MOVE");
+                    var_val[stoi(op2)] = var_val[stoi(op1)];
+                    break;
+
+                case "+1":
+                    System.out.println("ADD");
+                    var_val[stoi(op3)] = var_val[stoi(op1)] + var_val[stoi(op2)];
+                    break;
+
+                case "-1":
+                    System.out.println("SUB");
+                    var_val[stoi(op3)] = var_val[stoi(op1)] - var_val[stoi(op2)];
+                    break;
+
+                case "+2":
+                    System.out.println("MUL");
+                    var_val[stoi(op3)] = var_val[stoi(op1)] * var_val[stoi(op2)];
+                    break;
+
+                case "-2":
+                    System.out.println("DIV");
+                    var_val[stoi(op3)] = var_val[stoi(op1)] / var_val[stoi(op2)];
+                    break;
+
+                case "+3":
+                    System.out.println("GE");
+                    if (var_val[stoi(op1)] >= var_val[stoi(op2)]) {
+                        for (int k = 0; k < c1; k++) {
+                            if (code[k].substring(0, 2).equals(encode("LABL")) && code[k].substring(2, 5).equals(encode(op3))) {
+                                pc = k;
+                                System.out.println("Found Label " + op3);
+                            }
+                        }
+                    }
+                    break;
+                case "-3":
+                    System.out.println("LT");
+                    System.out.println("LT oper");
+                    break;
+
+                case "+4":
+                    System.out.println("GETA");
+                    if (op1.equals(encode("DTA"))) {
+                        var_val[stoi(op3)] = dta[(int) var_val[stoi(op2)]];
+                    }
+                    break;
+
+                case "-4":
+                    System.out.println("PUTA");
+                    if (op2.equals(encode("DTA"))) {
+                        dta[(int) var_val[stoi(op3)]] = var_val[stoi(op1)];
+                    }
+                    break;
+
+                case "+5":
+                    System.out.println("READ");
+                    var_val[stoi(op1)] = data[dc];
+                    System.out.println(var_name[stoi(op1)] + ": " + var_val[stoi(op1)]);
+                    dc++;
+                    break;
+
+                case "-5":
+                    System.out.println("LABL");
+                    if (op1.equals("020")) {
+                        System.out.println("Label 20");
+                    } else if (op1.equals("040")) {
+                        System.out.println("Label 40");
+                    } else if (op1.equals("050")) {
+                        System.out.println("Label 50");
+                    }
+                    break;
+
+                case "+6":
+                    System.out.println("LOOP");
+                    int count = (int) var_val[stoi(op2)] - (int) var_val[stoi(op1)];
+                    if (count >= 1) {
+                        for (int k = 0; k < c1; k++) {
+                            if (code[k].substring(0, 2).equals(encode("LABL")) && code[k].substring(2, 5).equals(encode(op3))) {
+                                pc = k;
+                                System.out.println("Found Label " + op3);
+                            }
+                        }
+                    }
+                    var_val[stoi(op1)] = var_val[stoi(op1)] + 1;
+                    System.out.println("Going to Label "+op3);
+                    break;
+
+                case "-6":
+                    System.out.println("PRNT");
+                    for (int c = 0; c < 6; c++) {
+                        System.out.println("value [" + c + "] is " + var_val[c]);
+                    }
+                    for (int c = 000; c < 6; c++) {
+                        System.out.println("dta value [" + c + "] is " + dta[c]);
+                    }
+                    System.out.println("The value of " + var_name[stoi(op1)] + " is " + var_val[stoi(op1)]);
+                    break;
+
+                case "-9":
+                    System.out.println("STOP");
+                    opc = "-9";
+                    i = c1 - 1;
+                    break;
+
+            }
+    
+        //step4: execution
+        //step5: store results
+        pc++;
+        //step6: next instruction 
+        }
+    }//end interpreter
+    
+    public static int stoi(String str){
+    int result = Integer.parseInt(str)-1;
+    return result;
+}
+    public static String encode(String str){
+        int i=0, j=0, k=0, tmp=0;
+        String result = "";
+        
+        
+        //sign with 1 bit for opcode
+        
+        if(str.equals("MOVE")){
+            result = "+0";
+        }//if
+        else if(str.equals("ADD")){
+            result = "+1";
+        }//eif
+         else if(str.equals("SUB")){
+            result = "-1";
+        }//eif
+         else if(str.equals("MUL")){
+            result = "+2";
+        }//eif
+        else if(str.equals("DIV")){
+            result = "-2";
+        }//eif
+         else if(str.equals("GE")){
+            result = "+3";
+        }//eif
+        else if(str.equals("LT")){
+            result = "-3";
+        }//eif
+         else if(str.equals("GETA")){
+            result = "+4";
+        }//eif
+        else if(str.equals("PUTA")){
+            result = "-4";
+        }//eif
+         else if(str.equals("READ")){
+            result = "+5";
+        }//eif
+        else if(str.equals("LABEL")){
+            result = "-5";
+        }//eif
+         else if(str.equals("LOOP")){
+            result = "+6";
+        }//eif
+        else if(str.equals("PRNT")){
+            result = "-6";
+        }//eif
+         else if(str.equals("STOP")){
+            result = "-9";
+        }//eif
+         
+         //3 bit for every operand
+         
+        else if(str.equals(var_name[0])){
+            result = "001";
+        }//eif
+        else if(str.equals(var_name[1])){
+            result = "002";
+        }//eif
+        else if(str.equals(var_name[2])){
+            result = "003";
+        }//eif
+        else if(str.equals(var_name[3])){
+            result = "004";
+        }//eif
+        else if(str.equals(var_name[4])){
+            result = "005";
+        }//eif
+        else if(str.equals(var_name[5])){
+            result = "006";
+        }//eif
+        else if(str.equals(var_name[6])){
+            result = "007";
+        }//eif
+        
+        //3 bit for special char or num
+        
+        else{
+            if(str.length() == 1){
+                result = "00" + str;
+            }//if
+            if(str.length() == 2){
+                result = "0" + str;
+            }//if
+            if(str.length() == 3){
+                result = str;
+            }//if
+        }//else
+        
+        return result;
+        
+    }//end encode
+}//end class
