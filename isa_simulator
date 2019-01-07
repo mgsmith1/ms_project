@@ -6,6 +6,7 @@ import java.text.*;
  * date: 2/20/18
  * @author makenna
  */
+ 
 public class Isa_simulator {
 
     public static String IN[] = new String[1000]; //array for data from outer file
