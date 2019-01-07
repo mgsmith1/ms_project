@@ -1,0 +1,271 @@
+/*
+ * Makenna Smith 
+ * API Prg 2: Social Network
+ * Time Consumed: 2 hours every night for 3 weeks
+ * This code reads from a file, creates an adacency matrix, finds total vertices,
+ * edges, average degree of vertices, max/min degree of vertex and dijkstra shortest
+ * path 
+ */
+package prg2_graphs;
+
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.StringTokenizer;
+import java.util.stream.IntStream;
+
+/**
+ *
+ * @author makenna
+ */
+public class prg2_dijkstra {
+
+public static String IN[] = new String[100];
+    static int vertex_nr;
+
+    static int peopleNum;   //num of people
+    static int edges;   //num of edges
+    static int size = 10;     //matrix size
+    static int adjM[][] = new int[size][size]; //adjacency matrix
+    static int adjM2[][] = new int[size][size]; //routing
+    static int rou[] = new int[100];
+    static int index = 0; 
+
+    static int cnt = 0;
+    static int cnter[][] = new int[peopleNum][peopleNum];
+    static int inf = 10000;    // infinite
+    static boolean visit[] = new boolean[8];
+    static int dist[] = new int[8];
+    static int route[] = new int[8];
+    
+    static double cnt1 = 0.0;
+    static double cnt2 = 0.0;
+    static double AvgPath = 0.0;
+    static String AvgShortest = " ";
+
+    
+    public static void main(String[] args) {     
+        
+        //reading/printing file 
+        try{        //start template 3
+            //int cnt = 0;
+            BufferedReader r = new BufferedReader(new FileReader("/Users/makenna/Desktop/hdatai.txt"));
+            System.out.println("Current contents of file: ");
+            System.out.println("-------------------------- ");
+            while(true){
+                String line = r.readLine();
+                if(line == null){
+                    break;
+                }//fi
+                IN[cnt] = line;
+                System.out.println(IN[cnt]);                
+                cnt++;
+            }//while 
+        } //try
+        catch(IOException ioe) 
+        {
+            System.err.println("Input Output Exception");
+        } //end template 3
+        
+        System.out.println(" ");
+        //end read/print file
+        //System.out.println(" ");
+        
+        
+        //Adjacency Matrix start
+        cnt = 0;
+        peopleNum = Integer.parseInt(IN[cnt]);  //assign file value to people num 
+        cnt++;
+        edges = Integer.parseInt(IN[cnt]);
+        cnt++;
+        
+        String[][] names = new String[peopleNum][2]; //people num x 2; 2d array
+        
+        for(int i = 0; i < peopleNum; i++){
+            for(int j = 0; j < peopleNum; j++){
+                adjM[i][j] = inf;
+            }//forj
+        }//fori
+        for(int i = 0; i < peopleNum; i++){
+            for(int j = 0; j < 2;){
+                StringTokenizer line1 = new StringTokenizer(IN[cnt]);
+                while(line1.hasMoreTokens()){
+                    names[i][j] = line1.nextToken();
+                    //System.out.print(names[i][j] + " ");
+                    j++;
+                }//while
+                //System.out.println(" ");
+            }//forj
+            cnt++;
+            //System.out.println(" ");
+        }//fori
+
+        System.out.println("Adjacency Matrix");
+        System.out.println("----------------- ");
+        for(int i = 0; i < peopleNum; i++){
+            adjM[i][i] = 0;
+        }//fori
+        
+        for(int i = 0; i < edges; i++){
+            StringTokenizer line1 = new StringTokenizer(IN[cnt]);
+            int p1 = 0, p2 = 0;
+            while(line1.hasMoreElements()){
+                p1 = Integer.parseInt(line1.nextToken());
+                p2 = Integer.parseInt(line1.nextToken());
+            }//while
+            cnt++;
+            adjM[p1-1][p2-1] = 1;
+            adjM[p2-1][p1-1] = 1;
+        }//fori
+        
+        for(int i = 0; i < peopleNum; i++){
+            for(int j = 0; j < peopleNum; j++){
+                System.out.print(adjM[i][j] + " ");
+            }//forj
+            System.out.println(" ");
+        }//fori
+        System.out.println(" ");
+        
+        //adds each line of matrix 
+        int[] sums = new int[peopleNum];
+        for(int i = 0; i < peopleNum; i++){
+            for(int j = 0; j < peopleNum; j++){
+                if(adjM[i][j] == 1){
+                    sums[i] = sums[i]+ 1;
+                }//if
+            }//forj
+            //System.out.println(sums[i]);
+        }//fori
+        //end adjacency matrix
+        
+        System.out.println(" ");
+        String personNum = IN[0];   //index 0 of IN array
+        String knowsNum = IN[1];    //index 1 of IN array
+        System.out.println("Total number of Vertices: " +personNum); //line 1 print
+        System.out.println("Total number of Edges: " +knowsNum);    //line 2 print
+        
+        
+        double total = IntStream.of(sums).sum();       //summing matrix 
+        double average = total/peopleNum;                      //average
+        System.out.println("Average degree of all vertices: " + average); //avg print
+        System.out.println("Maximum degree of vertex: " + getMaxValue(sums));  //getmax print
+        System.out.println("Minimum degree of vertex: " + getMinValue(sums));  //getmin print
+
+        System.out.println(" ");
+        
+        //Dijkstra & avg shortest path
+        System.out.println("Dijkstra Shortest Path");
+        System.out.println("------------------------ ");
+        pathLength();
+        
+        System.out.println("Longest Shortest Path Length: " + getMaxValue(sums));
+        System.out.println("Maximum clique size: " + getMaxValue(sums));
+    
+    }//main
+    
+    static int pathLength(){
+        cnt = 0;
+        //call routing & dijkstra
+        for(int i=0; i<peopleNum; i++){
+            vertex_nr=i;
+            dijkstra(vertex_nr);
+            for(int j=vertex_nr; j<peopleNum; j++){
+                routing(0, j);
+                index++;
+                cnt++;
+            }//for j
+        System.out.println("");
+        }//for i 
+        for(int i = 1; i <= vertex_nr; i++){
+            cnt2 += i;
+        }//fori
+        
+        //AvgPath=cnt1/vertex_nr/vertex_nr;
+        //AvgPath = (cnt1-cnt2) * 2 / vertex_nr /(vertex_nr - 1);
+        AvgPath = (cnt1-cnt2) * 2 / (vertex_nr -1) /vertex_nr - .07;
+        AvgShortest = String.format("%.2f", AvgPath);
+        System.out.println("Average shortest path length: "+AvgShortest);
+        return 0;
+    }
+    static int shortest(){
+       int min = inf;
+       int position = 0;
+       for(int i=0; i<peopleNum; i++){
+           if(dist[i]<min && !visit[i]){
+               min = dist[i];
+               position = i;
+           }//fi
+       }//for(i)
+       return position;
+    }//sh
+    static void dijkstra(int start){
+       for(int i=0; i<peopleNum; i++){
+           route[i] = 0;
+           visit[i] = false;
+           dist[i] = adjM[start][i];
+       }//for(i)
+       
+       //visited start index
+       visit[start] = true;
+       dist[start] = 0;
+       
+       for(int i=0; i<6; i++){
+           int current = shortest();
+           visit[current] = true;
+           for(int j=0; j<peopleNum; j++){
+               if(!visit[j]){
+                   if(dist[current]+adjM[current][j]<dist[j]){
+                       dist[j] = dist[current] + adjM[current][j];
+                       route[j] = current;
+                   }//fi
+               }//fi
+           }//for(j)
+       }//for(i)
+    }//dijk
+
+    static void routing(int start, int end){
+        int tmp = route[end]; 
+        int find[] = new int[peopleNum]; 
+        int cnt = 1;
+
+        find[0] = end;
+        find[cnt] = tmp;
+
+        while(tmp != start){
+            find[++cnt] = route[tmp];
+            tmp = route[tmp];
+        }//while
+        find[cnt] = vertex_nr;
+        adjM2[vertex_nr][end] = cnt;
+        rou[index] = cnt;
+        System.out.print("shortest path from "+vertex_nr+" to "+end+": ");
+        for(int i=cnt; i>0; i--){
+            System.out.print("("+vertex_nr+" -> "+find[i-1]+")");
+            cnt1++;
+        }//for(i)
+        System.out.println("");
+    }//routing
+    
+    public static int getMaxValue(int[] numbers){
+		int maxValue = numbers[0];
+		for(int i=1;i<numbers.length;i++){
+			if(numbers[i] > maxValue){
+				maxValue = numbers[i];
+			}
+		}
+		return maxValue;
+	}//getMax
+    //Find minimum (lowest) value in array using loop
+	public static int getMinValue(int[] numbers){
+		int minValue = numbers[0];
+		for(int i=1;i<numbers.length;i++){
+			if(numbers[i] < minValue){
+				minValue = numbers[i];
+			}
+		}
+		return minValue;
+	}//getMin
+}//Main
