@@ -6,6 +6,8 @@
  * edges, average degree of vertices, max/min degree of vertex and dijkstra shortest
  * path 
  */
+ /*
+
 package prg2_graphs;
 
 import java.io.BufferedReader;
