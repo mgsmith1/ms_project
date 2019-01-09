@@ -6,6 +6,40 @@ import java.text.*;
  * date: 2/20/18
  * @author makenna
  */
+ /*
+ Requirements:
+1.	1. Your program will read in a data, from a file specified such as i) variables with initial value, ii) command line, and iii) input separated by END.
+   2. The program will have two parts: a loader and the interpreter.
+      a. the loader-main memory
+         i. loads and parses the data and stores it in the data memory.
+         ii. loads and parses the commands, line-by-line, from the data memory, constructs the 
+           instruction code, and stores them in the program memory.
+         iii. parses the input to the program.
+         iv. report any errors during loading, and exit if there were problems.
+      b. the interpreter-cpu
+         i. is invoked after the loader finishes
+         ii. decodes and executes each instruction in the program memory according to the 
+            proper behavior of each instruction 
+    3. The program should have two 1000-element arrays for the data and program memory, 
+       respectively. The data memory should be floating-point type, the program memory should 
+       be integer type big enough to accommodate 10 decimal digits (long type in Java).    
+    4. Your program will print, to the standard output, the results (in floating point format) and 
+       traces of the program.
+    5. The definition of each instruction used in this simulator is as follows:
+        - READ P: read one line in order from the input and assign it in P 
+        - LABL P: location P in program line
+        - GE P Q R: if P is greater than or equals to Q, then go to LABL R
+        - SUB P Q R: subtract the contents of Q from that of P, then assign the result in R
+        - PUTA P Q R: assign the contents in P into Rth element location in array Q
+        - LOOP P Q R: go to LABL R (Q-P) times
+        - MOVE P Q: assign the contents of P into Q 
+        - GETA P Q R: assign the Qth element in array P into R 
+        - ADD P Q R: add the contents of P and Q, then assign the result in R
+        - DIV P Q R: divide the contents of P by that of Q, then assign the result n R
+        - PRNT P: print the contents of P
+        - STOP: terminate the program
+ */
+ 
  
 public class Isa_simulator {
 
